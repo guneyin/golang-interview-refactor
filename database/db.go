@@ -4,27 +4,45 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"interview/entity"
+	"sync"
 )
 
-func GetDatabase() *gorm.DB {
-	// MySQL connection string
-	// Update the username, password, host, port, and database name accordingly
-	dsn := "ice_user:9xz3jrd8wf@tcp(localhost:4001)/ice_db?charset=utf8mb4&parseTime=True&loc=Local"
+type Database struct {
+	*gorm.DB
+}
 
-	// Open the connection to the database
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
+var (
+	dbOnce sync.Once
+	db     *Database
+)
 
+func Get() *Database {
+	dbOnce.Do(func() {
+		var err error
+		db, err = newDatabase()
+		if err != nil {
+			panic(err)
+		}
+
+	})
 	return db
 }
 
-func Migrate() {
-	db := GetDatabase()
+func newDatabase() (*Database, error) {
+	dsn := "ice_user:9xz3jrd8wf@tcp(localhost:4001)/ice_db?charset=utf8mb4&parseTime=True&loc=Local"
 
-	// AutoMigrate will create or update the tables based on the models
-	err := db.AutoMigrate(&entity.CartEntity{}, &entity.CartItem{})
+	gdb, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
+
+	database := &Database{gdb}
+	database.migrate()
+	return database, nil
+}
+
+func (d *Database) migrate() {
+	err := d.AutoMigrate(&entity.CartEntity{}, &entity.CartItem{})
 	if err != nil {
 		panic(err)
 	}

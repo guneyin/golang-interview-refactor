@@ -2,25 +2,30 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"interview/controllers/cart"
-	"interview/database"
-	"net/http"
+	"interview/controllers"
+	"log"
 )
 
-func main() {
-	database.Migrate()
+type api struct {
+	router     *gin.Engine
+	controller *controllers.Controller
+}
 
-	ginEngine := gin.Default()
-	ginEngine.LoadHTMLGlob("templates/*")
+func newApi() *api {
+	router := gin.Default()
+	router.LoadHTMLGlob("templates/*")
 
-	cnt := cart.NewController()
-	ginEngine.GET("/", cnt.ShowAddItemForm)
-	ginEngine.POST("/add-item", cnt.AddItem)
-	ginEngine.GET("/remove-cart-item", cnt.DeleteCartItem)
-	srv := &http.Server{
-		Addr:    ":8088",
-		Handler: ginEngine,
+	return &api{
+		router:     router,
+		controller: controllers.New(router),
 	}
+}
 
-	srv.ListenAndServe()
+func (a *api) Start() error {
+	return a.router.Run(":8088")
+}
+
+func main() {
+	app := newApi()
+	log.Fatal(app.Start())
 }

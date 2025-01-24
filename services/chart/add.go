@@ -27,7 +27,7 @@ type CartItemForm struct {
 func AddItemToCart(c *gin.Context) {
 	cookie, _ := c.Request.Cookie("ice_session_id")
 
-	db := database.GetDatabase()
+	db := database.Get()
 
 	var isCartNew bool
 	var cartEntity entity.CartEntity

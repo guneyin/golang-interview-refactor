@@ -1,23 +1,25 @@
 package database
 
 import (
+	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"interview/config"
 	"interview/entity"
 	"sync"
+)
+
+var (
+	once sync.Once
+	db   *Database
 )
 
 type Database struct {
 	*gorm.DB
 }
 
-var (
-	dbOnce sync.Once
-	db     *Database
-)
-
 func Get() *Database {
-	dbOnce.Do(func() {
+	once.Do(func() {
 		var err error
 		db, err = newDatabase()
 		if err != nil {
@@ -29,7 +31,9 @@ func Get() *Database {
 }
 
 func newDatabase() (*Database, error) {
-	dsn := "ice_user:9xz3jrd8wf@tcp(localhost:4001)/ice_db?charset=utf8mb4&parseTime=True&loc=Local"
+	cfg := config.Get().Database
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.Database)
 
 	gdb, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {

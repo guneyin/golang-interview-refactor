@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"interview/config"
 	"interview/controllers"
 	"log"
 )
@@ -22,7 +24,8 @@ func newApi() *api {
 }
 
 func (a *api) Start() error {
-	return a.router.Run(":8088")
+	cfg := config.Get().App
+	return a.router.Run(fmt.Sprintf(":%s", cfg.Port))
 }
 
 func main() {

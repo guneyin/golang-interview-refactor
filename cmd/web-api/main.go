@@ -11,6 +11,7 @@ func main() {
 	db.MigrateDatabase()
 
 	ginEngine := gin.Default()
+	ginEngine.LoadHTMLGlob("templates/*")
 
 	var taxController controllers.TaxController
 	ginEngine.GET("/", taxController.ShowAddItemForm)

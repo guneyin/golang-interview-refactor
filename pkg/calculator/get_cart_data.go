@@ -3,17 +3,14 @@ package calculator
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"html/template"
 	db2 "interview/pkg/db"
 	"interview/pkg/entity"
-	"log"
-	"strings"
+	"net/http"
 )
 
 func GetCartData(c *gin.Context) {
 	data := map[string]interface{}{
 		"Error": c.Query("error"),
-		//"cartItems": cartItems,
 	}
 
 	cookie, err := c.Request.Cookie("ice_session_id")
@@ -21,15 +18,7 @@ func GetCartData(c *gin.Context) {
 		data["CartItems"] = getCartItemData(cookie.Value)
 	}
 
-	html, err := renderTemplate(data)
-	if err != nil {
-		log.Println(err)
-		c.AbortWithStatus(500)
-		return
-	}
-
-	c.Header("Content-Type", "text/html")
-	c.String(200, html)
+	c.HTML(http.StatusOK, "add_item_form.html", data)
 }
 func getCartItemData(sessionID string) (items []map[string]interface{}) {
 	db := db2.GetDatabase()
@@ -57,25 +46,4 @@ func getCartItemData(sessionID string) (items []map[string]interface{}) {
 		items = append(items, item)
 	}
 	return items
-}
-
-func renderTemplate(pageData interface{}) (string, error) {
-	// Read and parse the HTML template file
-	tmpl, err := template.ParseFiles("../../static/add_item_form.html")
-	if err != nil {
-		return "", fmt.Errorf("Error parsing template: %v ", err)
-	}
-
-	// Create a strings.Builder to store the rendered template
-	var renderedTemplate strings.Builder
-
-	err = tmpl.Execute(&renderedTemplate, pageData)
-	if err != nil {
-		return "", fmt.Errorf("Error parsing template: %v ", err)
-	}
-
-	// Convert the rendered template to a string
-	resultString := renderedTemplate.String()
-
-	return resultString, nil
 }

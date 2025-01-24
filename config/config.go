@@ -26,7 +26,7 @@ func Get() *Config {
 func newConfig() *Config {
 	return &Config{
 		App: AppConfig{
-			Port: os.Getenv("APP_PORT"),
+			Port: os.Getenv("HTTP_PORT"),
 		},
 		Database: DatabaseConfig{
 			Host:     os.Getenv("MYSQL_HOST"),

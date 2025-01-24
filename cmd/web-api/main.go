@@ -13,10 +13,10 @@ func main() {
 	ginEngine := gin.Default()
 	ginEngine.LoadHTMLGlob("templates/*")
 
-	var taxController controllers.TaxController
-	ginEngine.GET("/", taxController.ShowAddItemForm)
-	ginEngine.POST("/add-item", taxController.AddItem)
-	ginEngine.GET("/remove-cart-item", taxController.DeleteCartItem)
+	cnt := controllers.New()
+	ginEngine.GET("/", cnt.ShowAddItemForm)
+	ginEngine.POST("/add-item", cnt.AddItem)
+	ginEngine.GET("/remove-cart-item", cnt.DeleteCartItem)
 	srv := &http.Server{
 		Addr:    ":8088",
 		Handler: ginEngine,

@@ -8,10 +8,14 @@ import (
 	"time"
 )
 
-type TaxController struct {
+type Controller struct {
 }
 
-func (t *TaxController) ShowAddItemForm(c *gin.Context) {
+func New() *Controller {
+	return &Controller{}
+}
+
+func (*Controller) ShowAddItemForm(c *gin.Context) {
 	_, err := c.Request.Cookie("ice_session_id")
 	if errors.Is(err, http.ErrNoCookie) {
 		c.SetCookie("ice_session_id", time.Now().String(), 3600, "/", "localhost", false, true)
@@ -20,7 +24,7 @@ func (t *TaxController) ShowAddItemForm(c *gin.Context) {
 	calculator.GetCartData(c)
 }
 
-func (t *TaxController) AddItem(c *gin.Context) {
+func (*Controller) AddItem(c *gin.Context) {
 	cookie, err := c.Request.Cookie("ice_session_id")
 
 	if err != nil || errors.Is(err, http.ErrNoCookie) || (cookie != nil && cookie.Value == "") {
@@ -31,7 +35,7 @@ func (t *TaxController) AddItem(c *gin.Context) {
 	calculator.AddItemToCart(c)
 }
 
-func (t *TaxController) DeleteCartItem(c *gin.Context) {
+func (*Controller) DeleteCartItem(c *gin.Context) {
 	cookie, err := c.Request.Cookie("ice_session_id")
 
 	if err != nil || errors.Is(err, http.ErrNoCookie) || (cookie != nil && cookie.Value == "") {

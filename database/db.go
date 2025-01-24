@@ -1,8 +1,9 @@
-package db
+package database
 
 import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"interview/entity"
 )
 
 func GetDatabase() *gorm.DB {
@@ -17,4 +18,14 @@ func GetDatabase() *gorm.DB {
 	}
 
 	return db
+}
+
+func Migrate() {
+	db := GetDatabase()
+
+	// AutoMigrate will create or update the tables based on the models
+	err := db.AutoMigrate(&entity.CartEntity{}, &entity.CartItem{})
+	if err != nil {
+		panic(err)
+	}
 }

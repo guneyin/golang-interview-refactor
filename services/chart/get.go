@@ -1,10 +1,10 @@
-package calculator
+package chart
 
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	db2 "interview/pkg/db"
-	"interview/pkg/entity"
+	"interview/database"
+	"interview/entity"
 	"net/http"
 )
 
@@ -21,7 +21,7 @@ func GetCartData(c *gin.Context) {
 	c.HTML(http.StatusOK, "add_item_form.html", data)
 }
 func getCartItemData(sessionID string) (items []map[string]interface{}) {
-	db := db2.GetDatabase()
+	db := database.GetDatabase()
 	var cartEntity entity.CartEntity
 	result := db.Where(fmt.Sprintf("status = '%s' AND session_id = '%s'", entity.CartOpen, sessionID)).First(&cartEntity)
 

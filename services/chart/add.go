@@ -1,4 +1,4 @@
-package calculator
+package chart
 
 import (
 	"errors"
@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"gorm.io/gorm"
-	db2 "interview/pkg/db"
-	"interview/pkg/entity"
+	"interview/database"
+	"interview/entity"
 	"log"
 	"strconv"
 )
@@ -27,7 +27,7 @@ type CartItemForm struct {
 func AddItemToCart(c *gin.Context) {
 	cookie, _ := c.Request.Cookie("ice_session_id")
 
-	db := db2.GetDatabase()
+	db := database.GetDatabase()
 
 	var isCartNew bool
 	var cartEntity entity.CartEntity

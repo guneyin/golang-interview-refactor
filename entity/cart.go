@@ -15,3 +15,11 @@ type CartEntity struct {
 	SessionID string
 	Status    string
 }
+
+type CartItem struct {
+	gorm.Model
+	CartID      uint
+	ProductName string
+	Quantity    int
+	Price       float64
+}

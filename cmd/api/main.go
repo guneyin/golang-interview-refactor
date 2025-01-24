@@ -2,18 +2,18 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"interview/pkg/controllers"
-	"interview/pkg/db"
+	"interview/controllers/cart"
+	"interview/database"
 	"net/http"
 )
 
 func main() {
-	db.MigrateDatabase()
+	database.Migrate()
 
 	ginEngine := gin.Default()
 	ginEngine.LoadHTMLGlob("templates/*")
 
-	cnt := controllers.New()
+	cnt := cart.NewController()
 	ginEngine.GET("/", cnt.ShowAddItemForm)
 	ginEngine.POST("/add-item", cnt.AddItem)
 	ginEngine.GET("/remove-cart-item", cnt.DeleteCartItem)

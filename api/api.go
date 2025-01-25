@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"interview/config"
 	"interview/controllers"
+	"interview/mw"
 )
 
 type Api struct {
@@ -21,6 +22,8 @@ func New(cfg config.AppConfig) *Api {
 	store := cookie.NewStore([]byte(cfg.SessionSecret))
 	store.Options(sessions.Options{MaxAge: 60 * 60 * 24})
 	router.Use(sessions.Sessions("session", store))
+	router.Use(gin.Recovery())
+	router.Use(mw.ErrorHandler())
 
 	return &Api{
 		router:     router,

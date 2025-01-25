@@ -7,6 +7,8 @@ import (
 	"interview/entity"
 )
 
+var ErrInvalidItemName = errors.New("invalid item name")
+
 var productPriceList = map[string]float64{
 	"shoe":  100,
 	"purse": 200,
@@ -111,7 +113,7 @@ func (r *repositoryImpl) initCart(sessionID string) (uint, error) {
 func getProductPrice(product string) (float64, error) {
 	price, ok := productPriceList[product]
 	if !ok {
-		return 0, errors.New("invalid item name")
+		return 0, ErrInvalidItemName
 	}
 	return price, nil
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"interview/database"
 	"interview/entity"
+	"interview/mw"
 	"net/http"
 )
 
@@ -13,13 +14,18 @@ func GetCartData(c *gin.Context) {
 		"Error": c.Query("error"),
 	}
 
-	cookie, err := c.Request.Cookie("ice_session_id")
-	if err == nil {
-		data["CartItems"] = getCartItemData(cookie.Value)
+	sessionID, err := mw.GetSessionID(c)
+	if err != nil {
+		fmt.Println(err)
+		c.Redirect(http.StatusFound, "/")
+		return
 	}
+
+	data["CartItems"] = getCartItemData(sessionID)
 
 	c.HTML(http.StatusOK, "add_item_form.html", data)
 }
+
 func getCartItemData(sessionID string) (items []map[string]interface{}) {
 	db := database.Get()
 	var cartEntity entity.CartEntity

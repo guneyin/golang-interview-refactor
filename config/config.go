@@ -26,7 +26,8 @@ func Get() *Config {
 func newConfig() *Config {
 	return &Config{
 		App: AppConfig{
-			Port: os.Getenv("HTTP_PORT"),
+			SessionSecret: os.Getenv("SESSION_SECRET"),
+			Port:          os.Getenv("HTTP_PORT"),
 		},
 		Database: DatabaseConfig{
 			Host:     os.Getenv("MYSQL_HOST"),
@@ -39,7 +40,8 @@ func newConfig() *Config {
 }
 
 type AppConfig struct {
-	Port string `env:"HTTP_PORT" envDefault:"8088"`
+	SessionSecret string `env:"SESSION_SECRET"`
+	Port          string `env:"HTTP_PORT" envDefault:"8088"`
 }
 
 type DatabaseConfig struct {

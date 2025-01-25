@@ -8,7 +8,9 @@ import (
 	"gorm.io/gorm"
 	"interview/database"
 	"interview/entity"
+	"interview/mw"
 	"log"
+	"net/http"
 	"strconv"
 )
 
@@ -25,13 +27,18 @@ type CartItemForm struct {
 }
 
 func AddItemToCart(c *gin.Context) {
-	cookie, _ := c.Request.Cookie("ice_session_id")
+	sessionID, err := mw.GetSessionID(c)
+	if err != nil {
+		fmt.Println(err)
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
 
 	db := database.Get()
 
 	var isCartNew bool
 	var cartEntity entity.CartEntity
-	result := db.Where(fmt.Sprintf("status = '%s' AND session_id = '%s'", entity.CartOpen, cookie.Value)).First(&cartEntity)
+	result := db.Where(fmt.Sprintf("status = '%s' AND session_id = '%s'", entity.CartOpen, sessionID)).First(&cartEntity)
 
 	if result.Error != nil {
 		if !errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -40,7 +47,7 @@ func AddItemToCart(c *gin.Context) {
 		}
 		isCartNew = true
 		cartEntity = entity.CartEntity{
-			SessionID: cookie.Value,
+			SessionID: sessionID,
 			Status:    entity.CartOpen,
 		}
 		db.Create(&cartEntity)

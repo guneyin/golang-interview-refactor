@@ -20,6 +20,8 @@ type CartItem struct {
 	gorm.Model
 	CartID      uint
 	ProductName string
-	Quantity    int
+	Quantity    uint
 	Price       float64
 }
+
+type CartItems []CartItem

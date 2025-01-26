@@ -13,18 +13,15 @@ var (
 	_ IHandler = (*cart.Handler)(nil)
 )
 
-type Controller struct {
-	router *gin.Engine
-}
+type Controller struct{}
 
 func New(router *gin.Engine) *Controller {
-	cnt := &Controller{
-		router: router,
-	}
-	cnt.registerHandlers()
+	cnt := &Controller{}
+	cnt.registerHandlers(router)
+
 	return cnt
 }
 
-func (c *Controller) registerHandlers() {
-	cart.Register(c.router)
+func (c *Controller) registerHandlers(router *gin.Engine) {
+	cart.Register(router)
 }

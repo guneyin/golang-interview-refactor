@@ -3,12 +3,19 @@ package main
 import (
 	"interview/app"
 	"interview/config"
+	"interview/database"
 	"log"
 )
 
 func main() {
-	cfg := config.Get().App
-	ice := app.New(cfg)
+	cfg := config.Get()
 
-	log.Fatal(ice.Start(cfg.Port))
+	err := database.InitDB(database.DBMySQL)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ice := app.New(cfg.App)
+
+	log.Fatal(ice.Start())
 }

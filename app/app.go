@@ -11,6 +11,7 @@ import (
 )
 
 type Api struct {
+	port       string
 	router     *gin.Engine
 	controller *controllers.Controller
 }
@@ -26,11 +27,12 @@ func New(cfg config.AppConfig) *Api {
 	router.Use(mw.ErrorHandler())
 
 	return &Api{
+		port:       cfg.Port,
 		router:     router,
 		controller: controllers.New(router),
 	}
 }
 
-func (a *Api) Start(port string) error {
-	return a.router.Run(fmt.Sprintf(":%s", port))
+func (a *Api) Start() error {
+	return a.router.Run(fmt.Sprintf(":%s", a.port))
 }

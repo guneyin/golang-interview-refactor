@@ -1,7 +1,10 @@
 package config
 
 import (
+	"errors"
+	"fmt"
 	"os"
+	"reflect"
 	"sync"
 
 	// autoload env variable.
@@ -18,15 +21,33 @@ type Config struct {
 	Database DatabaseConfig
 }
 
+type AppConfig struct {
+	SessionSecret string `env:"SESSION_SECRET"`
+	Port          string `env:"HTTP_PORT"`
+}
+
+type DatabaseConfig struct {
+	Host     string `env:"MYSQL_HOST"`
+	Port     string `env:"MYSQL_PORT"`
+	Database string `env:"MYSQL_DATABASE"`
+	Username string `env:"MYSQL_USER"`
+	Password string `env:"MYSQL_PASSWORD"`
+}
+
 func Get() *Config {
+	var err error
 	once.Do(func() {
-		config = newConfig()
+		config, err = newConfig()
+		if err != nil {
+			panic(err)
+		}
 	})
+
 	return config
 }
 
-func newConfig() *Config {
-	return &Config{
+func newConfig() (*Config, error) {
+	cfg := &Config{
 		App: AppConfig{
 			SessionSecret: os.Getenv("SESSION_SECRET"),
 			Port:          os.Getenv("HTTP_PORT"),
@@ -39,17 +60,43 @@ func newConfig() *Config {
 			Password: os.Getenv("MYSQL_PASSWORD"),
 		},
 	}
+
+	err := cfg.validate()
+	if err != nil {
+		return nil, err
+	}
+
+	return cfg, nil
 }
 
-type AppConfig struct {
-	SessionSecret string `env:"SESSION_SECRET"`
-	Port          string `env:"HTTP_PORT" envDefault:"8088"`
+func (c *Config) validate() error {
+	return validate(c)
 }
 
-type DatabaseConfig struct {
-	Host     string `env:"MYSQL_HOST" envDefault:"localhost"`
-	Port     string `env:"MYSQL_PORT" envDefault:"5432"`
-	Database string `env:"MYSQL_DATABASE" envDefault:"ice_db"`
-	Username string `env:"MYSQL_USER"`
-	Password string `env:"MYSQL_PASSWORD"`
+func validate(s any) error {
+	var errs error
+
+	val := reflect.ValueOf(s).Elem()
+	for i := range val.NumField() {
+		field := val.Field(i)
+
+		kind := field.Kind()
+		if kind == reflect.Struct {
+			err := validate(field.Addr().Interface())
+			if err != nil {
+				errs = errors.Join(errs, err)
+			}
+		}
+
+		if field.IsZero() {
+			param := val.Type().Field(i).Tag.Get("env")
+			if param == "" {
+				continue
+			}
+
+			errs = errors.Join(errs, fmt.Errorf("param %s is required", param))
+		}
+	}
+
+	return errors.Join(errs)
 }

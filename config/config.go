@@ -1,9 +1,11 @@
 package config
 
 import (
-	_ "github.com/joho/godotenv/autoload"
 	"os"
 	"sync"
+
+	// autoload env variable.
+	_ "github.com/joho/godotenv/autoload"
 )
 
 var (

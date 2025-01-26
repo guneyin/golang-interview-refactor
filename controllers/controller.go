@@ -1,8 +1,9 @@
 package controllers
 
 import (
-	"github.com/gin-gonic/gin"
 	"interview/controllers/cart"
+
+	"github.com/gin-gonic/gin"
 )
 
 type IHandler interface {

@@ -2,8 +2,9 @@ package mw
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func ErrorHandler() gin.HandlerFunc {

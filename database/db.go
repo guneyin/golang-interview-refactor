@@ -3,12 +3,13 @@ package database
 import (
 	"errors"
 	"fmt"
-	"github.com/glebarez/sqlite"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 	"interview/config"
 	"interview/entity"
 	"sync"
+
+	"github.com/glebarez/sqlite"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 type DBProvider string

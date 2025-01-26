@@ -2,9 +2,10 @@ package cart
 
 import (
 	"errors"
-	"gorm.io/gorm"
 	"interview/database"
 	"interview/entity"
+
+	"gorm.io/gorm"
 )
 
 var ErrInvalidItemName = errors.New("invalid item name")
@@ -57,8 +58,13 @@ func (r *Repository) AddItem(sessionID, product string, qty uint) error {
 
 	db := database.Get()
 	tx := db.Where("cart_id = ? AND product_name = ?", cartID, product).First(&cartItem)
-	if !errors.Is(tx.Error, gorm.ErrRecordNotFound) && tx.Error != nil {
-		return err
+
+	if tx.Error != nil {
+		switch {
+		case errors.Is(tx.Error, gorm.ErrRecordNotFound):
+		default:
+			return tx.Error
+		}
 	}
 
 	cartItem.CartID = cartID

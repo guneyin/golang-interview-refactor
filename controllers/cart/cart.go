@@ -2,8 +2,6 @@ package cart
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 	"interview/dto"
 	"interview/entity"
 	"interview/mw"
@@ -11,6 +9,9 @@ import (
 	"net/http"
 	"strconv"
 	"sync"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 )
 
 var (
@@ -18,7 +19,7 @@ var (
 	handler *Handler
 
 	ErrInvalidQuantity = errors.New("invalid quantity")
-	ErrInvalidItemId   = errors.New("invalid item id")
+	ErrInvalidItemID   = errors.New("invalid item id")
 	ErrInvalidBody     = errors.New("invalid body")
 )
 
@@ -104,9 +105,9 @@ func (h *Handler) removeCartItem(c *gin.Context) {
 		return
 	}
 
-	itemID, err := strconv.ParseInt(c.Query("cart_item_id"), 10, 0)
+	itemID, err := strconv.ParseUint(c.Query("cart_item_id"), 10, 0)
 	if err != nil {
-		_ = c.Error(ErrInvalidItemId)
+		_ = c.Error(ErrInvalidItemID)
 		return
 	}
 

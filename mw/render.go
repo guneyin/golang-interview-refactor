@@ -1,8 +1,9 @@
 package mw
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func RenderError(c *gin.Context, err error) {

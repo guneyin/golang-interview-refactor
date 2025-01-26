@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"interview/dto"
+	"interview/entity"
 	"interview/mw"
 	"interview/services/cart"
 	"net/http"
@@ -35,37 +36,38 @@ func Register(router *gin.Engine) {
 func (h *Handler) SetRoutes(router *gin.Engine) {
 	g := router.Group("/").Use(mw.UseSession())
 
-	g.GET("/", h.showAddItemForm)
+	g.GET("/", h.index)
 	g.POST("/add-item", h.addItem)
-	g.GET("/remove-cart-item", h.deleteCartItem)
+	g.GET("/remove-cart-item", h.removeCartItem)
 }
 
-func (h *Handler) showAddItemForm(c *gin.Context) {
-	if c.Query("fatal") != "" {
-		mw.RenderError(c, c.Query("fatal"))
+func (h *Handler) index(c *gin.Context) {
+	data := dto.CartResponse{Error: c.Query("error")}
+
+	cartItems, err := h.getCart(c)
+	if err != nil {
+		mw.RenderError(c, err)
 		return
 	}
 
-	sessionID, err := mw.GetSessionID(c)
-	if err != nil {
-		_ = c.Error(mw.Fatal(err))
-		return
-	}
-
-	data, err := h.service.Get(sessionID)
-	if err != nil {
-		_ = c.Error(mw.Fatal(err))
-		return
-	}
-	data["Error"] = c.Query("error")
+	data.FromEntity(cartItems)
 
 	mw.RenderIndex(c, data)
+}
+
+func (h *Handler) getCart(c *gin.Context) (entity.CartItems, error) {
+	sessionID, err := mw.GetSessionID(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return h.service.GetCart(sessionID)
 }
 
 func (h *Handler) addItem(c *gin.Context) {
 	sessionID, err := mw.GetSessionID(c)
 	if err != nil {
-		_ = c.Error(mw.Fatal(err))
+		_ = c.Error(err)
 		return
 	}
 
@@ -95,10 +97,10 @@ func (h *Handler) addItem(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/")
 }
 
-func (h *Handler) deleteCartItem(c *gin.Context) {
+func (h *Handler) removeCartItem(c *gin.Context) {
 	sessionID, err := mw.GetSessionID(c)
 	if err != nil {
-		_ = c.Error(mw.Fatal(err))
+		_ = c.Error(err)
 		return
 	}
 

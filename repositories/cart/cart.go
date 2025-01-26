@@ -8,7 +8,10 @@ import (
 	"gorm.io/gorm"
 )
 
-var ErrInvalidItemName = errors.New("invalid item name")
+var (
+	ErrInvalidItemName = errors.New("invalid item name")
+	ErrCartNotFound    = errors.New("cart not found")
+)
 
 var productPriceList = map[string]float64{
 	"shoe":  100,
@@ -24,18 +27,16 @@ func NewRepository() *Repository {
 }
 
 func (r *Repository) GetCart(sessionID string) (entity.CartItems, error) {
-	var (
-		cartEntity entity.CartEntity
-		cartItems  entity.CartItems
-	)
+	var cartItems entity.CartItems
 
 	db := database.Get()
-	tx := db.Where("status = ? AND session_id = ?", entity.CartOpen, sessionID).First(&cartEntity)
-	if tx.Error != nil {
-		return nil, tx.Error
+
+	cartID, err := r.initCart(sessionID, false)
+	if err != nil {
+		return nil, err
 	}
 
-	tx = db.Where("cart_id = ?", cartEntity.ID).Find(&cartItems)
+	tx := db.Where("cart_id = ?", cartID).Find(&cartItems)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -44,7 +45,7 @@ func (r *Repository) GetCart(sessionID string) (entity.CartItems, error) {
 }
 
 func (r *Repository) AddItem(sessionID, product string, qty uint) error {
-	cartID, err := r.initCart(sessionID)
+	cartID, err := r.initCart(sessionID, true)
 	if err != nil {
 		return err
 	}
@@ -76,44 +77,42 @@ func (r *Repository) AddItem(sessionID, product string, qty uint) error {
 }
 
 func (r *Repository) DeleteItem(sessionID string, itemID uint) error {
+	db := database.Get()
+
+	cartID, err := r.initCart(sessionID, false)
+	if err != nil {
+		return err
+	}
+
+	return db.Where("cart_id = ? AND id = ?", cartID, itemID).Delete(&entity.CartItem{}).Error
+}
+
+func (r *Repository) initCart(sessionID string, create bool) (uint, error) {
 	cart := &entity.CartEntity{}
 
 	db := database.Get()
 	tx := db.Where("status = ? AND session_id = ?", entity.CartOpen, sessionID).First(&cart)
-	if tx.Error != nil {
-		return tx.Error
-	}
-
-	cartItem := &entity.CartItem{
-		Model: gorm.Model{ID: itemID},
-	}
-
-	tx = db.First(cartItem)
-	if tx.Error != nil {
-		return tx.Error
-	}
-
-	return db.Delete(&cartItem).Error
-}
-
-func (r *Repository) initCart(sessionID string) (uint, error) {
-	cartEntity := &entity.CartEntity{}
-
-	db := database.Get()
-	tx := db.Where("status = ? AND session_id = ?", entity.CartOpen, sessionID).First(&cartEntity)
 	if !errors.Is(tx.Error, gorm.ErrRecordNotFound) && tx.Error != nil {
 		return 0, tx.Error
 	}
 
-	cartEntity.Status = entity.CartOpen
-	cartEntity.SessionID = sessionID
+	if create {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			cart.Status = entity.CartOpen
+			cart.SessionID = sessionID
 
-	tx = db.Save(&cartEntity)
-	if tx.Error != nil {
-		return 0, tx.Error
+			tx = db.Save(&cart)
+			if tx.Error != nil {
+				return 0, tx.Error
+			}
+		}
 	}
 
-	return cartEntity.ID, nil
+	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+		return 0, ErrCartNotFound
+	}
+
+	return cart.ID, tx.Error
 }
 
 func getProductPrice(product string) (float64, error) {

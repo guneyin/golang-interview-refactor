@@ -45,10 +45,3 @@ func New(cfg config.AppConfig) *Api {
 func (a *Api) Start() error {
 	return a.router.Run(fmt.Sprintf(":%s", a.port))
 }
-
-func recoveryHandler(c *gin.Context, err interface{}) {
-	c.HTML(500, "error.tmpl", gin.H{
-		"title": "Error",
-		"err":   err,
-	})
-}

@@ -2,7 +2,6 @@ package cart
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"interview/dto"
@@ -19,6 +18,7 @@ var (
 
 	ErrInvalidQuantity = errors.New("invalid quantity")
 	ErrInvalidItemId   = errors.New("invalid item id")
+	ErrInvalidBody     = errors.New("invalid body")
 )
 
 type Handler struct {
@@ -34,36 +34,38 @@ func Register(router *gin.Engine) {
 
 func (h *Handler) SetRoutes(router *gin.Engine) {
 	g := router.Group("/").Use(mw.UseSession())
-	g.GET("/", h.ShowAddItemForm)
-	g.POST("/add-item", h.AddItem)
-	g.GET("/remove-cart-item", h.DeleteCartItem)
+
+	g.GET("/", h.showAddItemForm)
+	g.POST("/add-item", h.addItem)
+	g.GET("/remove-cart-item", h.deleteCartItem)
 }
 
-func (h *Handler) ShowAddItemForm(c *gin.Context) {
-	if c.Query("error") != "" {
-		c.HTML(http.StatusOK, "add_item_form.html", map[string]any{"Error": c.Query("error")})
+func (h *Handler) showAddItemForm(c *gin.Context) {
+	if c.Query("fatal") != "" {
+		mw.RenderError(c, c.Query("fatal"))
 		return
 	}
 
 	sessionID, err := mw.GetSessionID(c)
 	if err != nil {
-		_ = c.Error(err)
+		_ = c.Error(mw.Fatal(err))
 		return
 	}
 
 	data, err := h.service.Get(sessionID)
 	if err != nil {
-		_ = c.Error(err)
+		_ = c.Error(mw.Fatal(err))
 		return
 	}
+	data["Error"] = c.Query("error")
 
-	c.HTML(http.StatusOK, "add_item_form.html", data)
+	mw.RenderIndex(c, data)
 }
 
-func (h *Handler) AddItem(c *gin.Context) {
+func (h *Handler) addItem(c *gin.Context) {
 	sessionID, err := mw.GetSessionID(c)
 	if err != nil {
-		_ = c.Error(err)
+		_ = c.Error(mw.Fatal(err))
 		return
 	}
 
@@ -90,13 +92,13 @@ func (h *Handler) AddItem(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(302, "/")
+	c.Redirect(http.StatusFound, "/")
 }
 
-func (h *Handler) DeleteCartItem(c *gin.Context) {
+func (h *Handler) deleteCartItem(c *gin.Context) {
 	sessionID, err := mw.GetSessionID(c)
 	if err != nil {
-		_ = c.Error(err)
+		_ = c.Error(mw.Fatal(err))
 		return
 	}
 
@@ -112,12 +114,12 @@ func (h *Handler) DeleteCartItem(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(302, "/")
+	c.Redirect(http.StatusFound, "/")
 }
 
 func (h *Handler) parseCartItemForm(c *gin.Context) (*dto.CartItemForm, error) {
 	if c.Request.Body == nil {
-		return nil, fmt.Errorf("body cannot be nil")
+		return nil, ErrInvalidBody
 	}
 
 	form := &dto.CartItemForm{}

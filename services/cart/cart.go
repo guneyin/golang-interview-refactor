@@ -5,7 +5,7 @@ import (
 )
 
 type Service struct {
-	repo cart.Repository
+	repo *cart.Repository
 }
 
 func NewService() *Service {
@@ -29,6 +29,7 @@ func (s *Service) Get(sessionID string) (map[string]any, error) {
 
 	data := make(map[string]any)
 	data["CartItems"] = dataItems
+
 	return data, nil
 }
 

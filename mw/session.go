@@ -10,8 +10,8 @@ import (
 const sessionIdKey = "ice_session_id"
 
 var (
-	ErrSessionNotFound   = errors.New("session not found")
-	ErrSessionIdNotFound = errors.New("session id not found")
+	ErrSessionNotFound = errors.New("session not found")
+	ErrInvalidSession  = errors.New("invalid session")
 )
 
 func UseSession() gin.HandlerFunc {
@@ -22,6 +22,7 @@ func UseSession() gin.HandlerFunc {
 			_ = sess.Save()
 		}
 		sessionId := sess.Get(sessionIdKey)
+
 		c.Set(sessionIdKey, sessionId)
 		c.Next()
 	}
@@ -35,7 +36,7 @@ func GetSessionID(c *gin.Context) (string, error) {
 
 	id, ok := val.(string)
 	if !ok {
-		return "", ErrSessionIdNotFound
+		return "", ErrInvalidSession
 	}
 
 	return id, nil

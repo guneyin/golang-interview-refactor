@@ -42,6 +42,7 @@ func newDatabase() (*Database, error) {
 
 	database := &Database{gdb}
 	database.migrate()
+
 	return database, nil
 }
 

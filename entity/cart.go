@@ -4,10 +4,7 @@ import (
 	"gorm.io/gorm"
 )
 
-const (
-	CartOpen   = "open"
-	CartClosed = "closed"
-)
+const CartOpen = "open"
 
 type CartEntity struct {
 	gorm.Model

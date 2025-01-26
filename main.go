@@ -1,13 +1,14 @@
 package main
 
 import (
-	"interview/api"
+	"interview/app"
 	"interview/config"
 	"log"
 )
 
 func main() {
 	cfg := config.Get().App
-	app := api.New(cfg)
-	log.Fatal(app.Start(cfg.Port))
+	ice := app.New(cfg)
+
+	log.Fatal(ice.Start(cfg.Port))
 }

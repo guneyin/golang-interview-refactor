@@ -22,6 +22,9 @@ vet:
 build:
 	go build -o ${BINARY_NAME} .
 
+lint:
+	golangci-lint run
+
 test:
 	go test ./...
 

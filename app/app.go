@@ -37,6 +37,7 @@ func New(cfg config.AppConfig) *API {
 		}
 	}))
 	router.Use(mw.ErrorHandler())
+	router.Use(mw.UseRateLimiter())
 
 	return &API{
 		port:       cfg.Port,

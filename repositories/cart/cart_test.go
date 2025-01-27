@@ -1,10 +1,12 @@
-package cart
+package cart_test
 
 import (
 	"errors"
-	"github.com/google/uuid"
 	"interview/database"
+	"interview/repositories/cart"
 	"testing"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -15,7 +17,7 @@ const (
 
 var sessionID = uuid.New().String()
 
-func init() {
+func initDB() {
 	err := database.InitDB(database.DBTest)
 	if err != nil {
 		panic(err)
@@ -23,10 +25,12 @@ func init() {
 }
 
 func TestRepository_GetCart(t *testing.T) {
-	repo := NewRepository()
+	initDB()
+
+	repo := cart.NewRepository()
 
 	_, err := repo.GetCart(sessionID)
-	if !errors.Is(err, ErrCartNotFound) {
+	if !errors.Is(err, cart.ErrCartNotFound) {
 		t.Fatal("expected ErrCartNotFound")
 	}
 
@@ -35,30 +39,32 @@ func TestRepository_GetCart(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cart, err := repo.GetCart(sessionID)
+	cartItems, err := repo.GetCart(sessionID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(cart) != 1 {
+	if len(cartItems) != 1 {
 		t.Fatal("item count should be 1")
 	}
 
-	productPrice, err := getProductPrice(product)
+	productPrice, err := cart.GetProductPrice(product)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	itemPrice := productPrice * productQty
 
-	item := cart[0]
+	item := cartItems[0]
 	if item.Price != itemPrice {
 		t.Fatal("price should be equal")
 	}
 }
 
 func TestRepository_AddItem(t *testing.T) {
-	repo := NewRepository()
+	initDB()
+
+	repo := cart.NewRepository()
 
 	err := repo.AddItem(sessionID, invalidProduct, productQty)
 	if err == nil {
@@ -67,19 +73,21 @@ func TestRepository_AddItem(t *testing.T) {
 }
 
 func TestRepository_DeleteItem(t *testing.T) {
-	repo := NewRepository()
+	initDB()
+
+	repo := cart.NewRepository()
 
 	err := repo.AddItem(sessionID, product, productQty)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	cart, err := repo.GetCart(sessionID)
+	cartItems, err := repo.GetCart(sessionID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(cart) != 1 {
+	if len(cartItems) != 1 {
 		t.Fatal("item count should be 1")
 	}
 
@@ -88,12 +96,12 @@ func TestRepository_DeleteItem(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cart, err = repo.GetCart(sessionID)
+	cartItems, err = repo.GetCart(sessionID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(cart) != 0 {
+	if len(cartItems) != 0 {
 		t.Fatal("item count should be 0")
 	}
 }

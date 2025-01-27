@@ -1,9 +1,11 @@
-package cart
+package cart_test
 
 import (
-	"github.com/google/uuid"
 	"interview/database"
+	"interview/services/cart"
 	"testing"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -14,7 +16,7 @@ const (
 
 var sessionID = uuid.New().String()
 
-func init() {
+func initDB() {
 	err := database.InitDB(database.DBTest)
 	if err != nil {
 		panic(err)
@@ -22,7 +24,9 @@ func init() {
 }
 
 func TestService(t *testing.T) {
-	service := NewService()
+	initDB()
+
+	service := cart.NewService()
 
 	err := service.Add(sessionID, product, productQty)
 	if err != nil {
@@ -34,11 +38,16 @@ func TestService(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cart, err := service.GetCart(sessionID)
+	cartItems, err := service.GetCart(sessionID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(cart) > 0 {
+	if len(cartItems) > 0 {
 		t.Fatal("cart should be nil")
+	}
+
+	err = service.Add(sessionID, invalidProduct, productQty)
+	if err == nil {
+		t.Fatal("cart should not be created")
 	}
 }

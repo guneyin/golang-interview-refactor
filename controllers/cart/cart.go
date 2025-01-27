@@ -11,7 +11,6 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 )
 
 var (
@@ -21,15 +20,20 @@ var (
 	ErrInvalidQuantity = errors.New("invalid quantity")
 	ErrInvalidItemID   = errors.New("invalid item id")
 	ErrInvalidBody     = errors.New("invalid body")
+	ErrInvalidFormData = errors.New("invalid form data")
 )
 
 type Handler struct {
 	service *cart.Service
 }
 
+func newHandler() *Handler {
+	return &Handler{service: cart.NewService()}
+}
+
 func Register(router *gin.Engine) {
 	once.Do(func() {
-		handler = &Handler{service: cart.NewService()}
+		handler = newHandler()
 		handler.SetRoutes(router)
 	})
 }
@@ -126,8 +130,9 @@ func (h *Handler) parseCartItemForm(c *gin.Context) (*dto.CartItemForm, error) {
 	}
 
 	form := &dto.CartItemForm{}
-	if err := binding.FormPost.Bind(c.Request, form); err != nil {
-		return nil, err
+
+	if err := c.ShouldBind(form); err != nil {
+		return nil, ErrInvalidFormData
 	}
 
 	return form, nil

@@ -5,9 +5,12 @@ import (
 	"interview/config"
 	"interview/database"
 	"log"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	gin.SetMode(gin.ReleaseMode)
 	cfg := config.Get()
 
 	err := database.InitDB(database.DBMySQL)

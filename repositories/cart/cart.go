@@ -108,11 +108,7 @@ func (r *Repository) initCart(sessionID string, create bool) (uint, error) {
 		}
 	}
 
-	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
-		return 0, ErrCartNotFound
-	}
-
-	return cart.ID, tx.Error
+	return cart.ID, nil
 }
 
 func getProductPrice(product string) (float64, error) {

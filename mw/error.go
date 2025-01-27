@@ -13,7 +13,7 @@ func ErrorHandler() gin.HandlerFunc {
 
 		if len(c.Errors) > 0 {
 			err := c.Errors.Last().Err
-			c.Redirect(http.StatusFound, fmt.Sprintf("/?error=%s", err))
+			c.Redirect(http.StatusNotModified, fmt.Sprintf("/?error=%s", err))
 		}
 	}
 }

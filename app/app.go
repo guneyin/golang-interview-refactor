@@ -1,20 +1,13 @@
 package app
 
 import (
-	"errors"
 	"fmt"
 	"interview/config"
 	"interview/controllers"
-	"interview/mw"
+	"interview/router"
 
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 )
-
-const cookieMaxAge = 60 * 60 * 24
-
-var ErrInternalServerError = errors.New("internal Server Error")
 
 type API struct {
 	port       string
@@ -23,26 +16,12 @@ type API struct {
 }
 
 func New(cfg config.AppConfig) *API {
-	router := gin.Default()
-	router.LoadHTMLGlob("templates/*")
-
-	store := cookie.NewStore([]byte(cfg.SessionSecret))
-	store.Options(sessions.Options{MaxAge: cookieMaxAge, Path: "/"})
-	router.Use(sessions.Sessions("session", store))
-	router.Use(gin.CustomRecovery(func(c *gin.Context, recovered interface{}) {
-		if err, ok := recovered.(error); ok {
-			mw.RenderError(c, fmt.Errorf("panic recovered: %w", err))
-		} else {
-			mw.RenderError(c, ErrInternalServerError)
-		}
-	}))
-	router.Use(mw.ErrorHandler())
-	router.Use(mw.UseRateLimiter())
+	r := router.NewRouter(cfg)
 
 	return &API{
 		port:       cfg.Port,
-		router:     router,
-		controller: controllers.New(router),
+		router:     r,
+		controller: controllers.New(r),
 	}
 }
 

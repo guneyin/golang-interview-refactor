@@ -1,43 +1,27 @@
 package cart_test
 
 import (
-	"interview/database"
 	"interview/services/cart"
+	"interview/test"
 	"testing"
-
-	"github.com/google/uuid"
 )
-
-const (
-	product        = "shoe"
-	invalidProduct = "t-shirt"
-	productQty     = 2
-)
-
-var sessionID = uuid.New().String()
-
-func initDB() {
-	err := database.InitDB(database.DBTest)
-	if err != nil {
-		panic(err)
-	}
-}
 
 func TestService(t *testing.T) {
-	initDB()
+	test.InitTestDB()
+
 	service := cart.NewService()
 
-	err := service.Add(sessionID, product, productQty)
+	err := service.Add(test.SessionID, test.Product, test.ProductQty)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = service.Delete(sessionID, 1)
+	err = service.Delete(test.SessionID, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	cartItems, err := service.GetCart(sessionID)
+	cartItems, err := service.GetCart(test.SessionID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +29,7 @@ func TestService(t *testing.T) {
 		t.Fatal("cart should be nil")
 	}
 
-	err = service.Add(sessionID, invalidProduct, productQty)
+	err = service.Add(test.SessionID, test.InvalidProduct, test.ProductQty)
 	if err == nil {
 		t.Fatal("cart should not be created")
 	}

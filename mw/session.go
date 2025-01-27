@@ -2,7 +2,6 @@ package mw
 
 import (
 	"errors"
-
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -11,8 +10,8 @@ import (
 const sessionIDKey = "ice_session_id"
 
 var (
-	ErrSessionNotFound = errors.New("session not found")
-	ErrInvalidSession  = errors.New("invalid session")
+	ErrSessionNotFound  = errors.New("session not found")
+	ErrInvalidSessionID = errors.New("invalid session id")
 )
 
 func UseSession() gin.HandlerFunc {
@@ -37,7 +36,12 @@ func GetSessionID(c *gin.Context) (string, error) {
 
 	id, ok := val.(string)
 	if !ok {
-		return "", ErrInvalidSession
+		return "", ErrInvalidSessionID
+	}
+
+	err := uuid.Validate(id)
+	if err != nil {
+		return "", ErrInvalidSessionID
 	}
 
 	return id, nil

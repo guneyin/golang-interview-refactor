@@ -3,12 +3,12 @@ package config
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"reflect"
 	"sync"
 
-	// autoload env variable.
-	_ "github.com/joho/godotenv/autoload"
+	"github.com/joho/godotenv"
 )
 
 var (
@@ -47,6 +47,11 @@ func Get() *Config {
 }
 
 func newConfig() (*Config, error) {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Println("error loading .env file")
+	}
+
 	cfg := &Config{
 		App: AppConfig{
 			SessionSecret: os.Getenv("SESSION_SECRET"),
@@ -61,7 +66,7 @@ func newConfig() (*Config, error) {
 		},
 	}
 
-	err := cfg.validate()
+	err = cfg.validate()
 	if err != nil {
 		return nil, err
 	}

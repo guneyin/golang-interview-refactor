@@ -25,7 +25,6 @@ func initDB() {
 
 func TestService(t *testing.T) {
 	initDB()
-
 	service := cart.NewService()
 
 	err := service.Add(sessionID, product, productQty)

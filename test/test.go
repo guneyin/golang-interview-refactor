@@ -1,13 +1,14 @@
 package test
 
 import (
-	"github.com/google/uuid"
 	"interview/config"
 	"interview/database"
 	"interview/router"
 	"os"
 	"path"
 	"runtime"
+
+	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 )

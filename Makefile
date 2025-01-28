@@ -1,14 +1,14 @@
 BINARY_NAME=ice
 
-.PHONY: build
+init: install clean mod tidy vet
 
-PACKAGE=interview
-
-init: clean mod tidy vet build
+install:
+	go install github.com/AlexBeauchemin/gobadge@latest
 
 clean:
 	go clean
 	rm -f ${BINARY_NAME}
+	rm *.out
 
 mod:
 	go mod download
@@ -29,11 +29,14 @@ fix:
 	golangci-lint run --fix
 
 test:
-	go test ./...
+	go test ./... -covermode=count -coverprofile=coverage.out fmt
 
-cover:
-	go test ./... -coverprofile=cover.out
-	go tool cover -html=cover.out
+coverage: test
+	go tool cover -html=coverage.out
+
+badge: test
+	go tool cover -func=coverage.out -o=coverage.out
+	gobadge -filename=coverage.out
 
 run:
 	go run .

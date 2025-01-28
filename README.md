@@ -1,3 +1,5 @@
+
+![Coverage](https://img.shields.io/badge/Coverage-73.2%25-brightgreen)
 ## Introduction
 This repository is written to test candidate's skills when it comes to writing clean and maintainable code base. In the real world, we rarely get the chance to develop our code base from scratch and most often we have to deal with the code which is either legacy or not ours. In order to write this repository, we wrote a simple tax calculator which was used to calculate the taxes you had to pay on your income. Then we remove the parts we didn't need and wrote a simple shopping cart manager. 
 

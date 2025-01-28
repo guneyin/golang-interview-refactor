@@ -3,7 +3,7 @@ package cart_test
 import (
 	"interview/controllers/cart"
 	"interview/mw"
-	"interview/test"
+	"interview/testutils"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -30,10 +30,10 @@ func setParams(product string, qty, code int) {
 }
 
 func initTest() {
-	test.ChangeWorkDir()
-	test.InitTestDB()
+	testutils.ChangeWorkDir()
+	testutils.InitTestDB()
 
-	router = test.NewTestRouter()
+	router = testutils.NewTestRouter()
 	router.Use(mw.UseSession())
 
 	handler = cart.NewHandler()
@@ -48,7 +48,7 @@ func TestIndex(t *testing.T) {
 func TestAddItem(t *testing.T) {
 	initTest()
 
-	setParams(test.Product, test.ProductQty, http.StatusFound)
+	setParams(testutils.Product, testutils.ProductQty, http.StatusFound)
 	t.Run("Add Item", addItem)
 
 	t.Run("Get Cart With Item", TestIndex)
@@ -57,21 +57,21 @@ func TestAddItem(t *testing.T) {
 func TestAddItemInvalidQty(t *testing.T) {
 	initTest()
 
-	setParams(test.Product, 0, http.StatusSeeOther)
+	setParams(testutils.Product, 0, http.StatusSeeOther)
 	t.Run("Add Item With Invalid Qty", addItem)
 }
 
 func TestAddItemInvalidProduct(t *testing.T) {
 	initTest()
 
-	setParams(test.InvalidProduct, test.ProductQty, http.StatusSeeOther)
+	setParams(testutils.InvalidProduct, testutils.ProductQty, http.StatusSeeOther)
 	t.Run("Add Item With Invalid Product", addItem)
 }
 
 func TestDeleteItem(t *testing.T) {
 	initTest()
 
-	setParams(test.Product, test.ProductQty, http.StatusFound)
+	setParams(testutils.Product, testutils.ProductQty, http.StatusFound)
 	t.Run("Add Item", addItem)
 
 	t.Run("Delete Item", deleteItem)

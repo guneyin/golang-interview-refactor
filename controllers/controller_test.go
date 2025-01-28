@@ -2,15 +2,15 @@ package controllers_test
 
 import (
 	"interview/controllers"
-	"interview/test"
+	"interview/testutils"
 	"testing"
 )
 
 func TestNew(t *testing.T) {
-	test.ChangeWorkDir()
-	test.InitTestDB()
+	testutils.ChangeWorkDir()
+	testutils.InitTestDB()
 
-	cnt := controllers.New(test.NewTestRouter())
+	cnt := controllers.New(testutils.NewTestRouter())
 	if cnt == nil {
 		t.Fatal("controller is nil")
 	}

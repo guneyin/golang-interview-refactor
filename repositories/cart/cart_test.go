@@ -2,28 +2,28 @@ package cart_test
 
 import (
 	"interview/repositories/cart"
-	"interview/test"
+	"interview/testutils"
 	"testing"
 )
 
 func TestRepository_GetCart(t *testing.T) {
-	test.InitTestDB()
+	testutils.InitTestDB()
 	repo := cart.NewRepository()
 
 	t.Run("Get Empty Cart", func(t *testing.T) {
-		_, err := repo.GetCart(test.SessionID)
+		_, err := repo.GetCart(testutils.SessionID)
 		if err != nil {
 			t.Fatal(err)
 		}
 	})
 
 	t.Run("Get Cart With Item", func(t *testing.T) {
-		err := repo.AddItem(test.SessionID, test.Product, test.ProductQty)
+		err := repo.AddItem(testutils.SessionID, testutils.Product, testutils.ProductQty)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		cartItems, err := repo.GetCart(test.SessionID)
+		cartItems, err := repo.GetCart(testutils.SessionID)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -32,12 +32,12 @@ func TestRepository_GetCart(t *testing.T) {
 			t.Fatal("item count should be 1")
 		}
 
-		productPrice, err := cart.GetProductPrice(test.Product)
+		productPrice, err := cart.GetProductPrice(testutils.Product)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		itemPrice := productPrice * test.ProductQty
+		itemPrice := productPrice * testutils.ProductQty
 
 		item := cartItems[0]
 		if item.Price != itemPrice {
@@ -47,18 +47,18 @@ func TestRepository_GetCart(t *testing.T) {
 }
 
 func TestRepository_AddItem(t *testing.T) {
-	test.InitTestDB()
+	testutils.InitTestDB()
 	repo := cart.NewRepository()
 
 	t.Run("Add Item", func(t *testing.T) {
-		err := repo.AddItem(test.SessionID, test.Product, test.ProductQty)
+		err := repo.AddItem(testutils.SessionID, testutils.Product, testutils.ProductQty)
 		if err != nil {
 			t.Fatal(err)
 		}
 	})
 
 	t.Run("Add Item With Invalid Product", func(t *testing.T) {
-		err := repo.AddItem(test.SessionID, test.InvalidProduct, test.ProductQty)
+		err := repo.AddItem(testutils.SessionID, testutils.InvalidProduct, testutils.ProductQty)
 		if err == nil {
 			t.Fatal("expected error")
 		}
@@ -66,16 +66,16 @@ func TestRepository_AddItem(t *testing.T) {
 }
 
 func TestRepository_DeleteItem(t *testing.T) {
-	test.InitTestDB()
+	testutils.InitTestDB()
 	repo := cart.NewRepository()
 
 	t.Run("Delete Item", func(t *testing.T) {
-		err := repo.AddItem(test.SessionID, test.Product, test.ProductQty)
+		err := repo.AddItem(testutils.SessionID, testutils.Product, testutils.ProductQty)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		cartItems, err := repo.GetCart(test.SessionID)
+		cartItems, err := repo.GetCart(testutils.SessionID)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -84,12 +84,12 @@ func TestRepository_DeleteItem(t *testing.T) {
 			t.Fatal("item count should be 1")
 		}
 
-		err = repo.DeleteItem(test.SessionID, 1)
+		err = repo.DeleteItem(testutils.SessionID, 1)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		cartItems, err = repo.GetCart(test.SessionID)
+		cartItems, err = repo.GetCart(testutils.SessionID)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -100,12 +100,12 @@ func TestRepository_DeleteItem(t *testing.T) {
 	})
 
 	t.Run("Delete Invalid Session Item", func(t *testing.T) {
-		err := repo.AddItem(test.SessionID, test.Product, test.ProductQty)
+		err := repo.AddItem(testutils.SessionID, testutils.Product, testutils.ProductQty)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		err = repo.DeleteItem(test.InvalidSessionID, 1)
+		err = repo.DeleteItem(testutils.InvalidSessionID, 1)
 		if err != nil {
 			t.Fatal(err)
 		}
